@@ -24,15 +24,13 @@ var _bodyParser2 = _interopRequireDefault(_bodyParser);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-console.log("sf");
-
 var app = (0, _express2.default)();
 
 _moment2.default.tz.setDefault("Asia/Seoul");
 app.use((0, _morgan2.default)('dev', {}));
 app.use(_bodyParser2.default.json());
 var getDate = function getDate(dayPlus) {
-  var currentDate_arr = (0, _moment2.default)().add(dayPlus, 'days').format('YYYY MM DD').split(" ");
+  var currentDate_arr = (0, _moment2.default)().add(-42, 'days').format('YYYY MM DD').split(" ");
   var currentDate_obj = {
     year: parseInt(currentDate_arr[0]),
     month: parseInt(currentDate_arr[1]),
@@ -43,6 +41,7 @@ var getDate = function getDate(dayPlus) {
 var getLunch = async function getLunch(count) {
   try {
     var currentLunches = await _axios2.default.get("https://school.iamservice.net/api/article/organization/16777/group/2068031?next_token=" + String(count));
+    if (!currentLunches.data.articles.length) return null;
     return currentLunches;
   } catch (error) {
     console.error(error);
@@ -52,9 +51,13 @@ var getLunch = async function getLunch(count) {
 var getTodayLunch = async function getTodayLunch(count) {
   var currentDate_obj = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 
+  console.log(count);
   var finalLunch = void 0;
   var lunches = await getLunch(count);
-  if (lunches === null) return "오늘 급식을 불러오지 못했습니다.";
+  if (lunches === null) {
+    console.log("?????");
+    return "급식을 불러오지 못했습니다.";
+  }
   var lunches_with_date = lunches.data.articles.map(function (lunch, index, arr) {
     var menu = "";
     lunch.content.split(" ").map(function (each_menu, index, arr) {
@@ -81,9 +84,10 @@ var getTodayLunch = async function getTodayLunch(count) {
       console.log(finalLunch);
       return finalLunch + String(lunch.date.year) + "년 " + String(lunch.date.month) + "월 " + String(lunch.date.day) + "일 급식 입니다.";
     }
-
-    last_date = lunches_with_date[i].date;
   }
+  last_date = lunches_with_date[i].date;
+  console.log("last date");
+  console.log(last_date);
   if (last_date.year < currentDate_obj.year) {
     console.log("nothing same");
     return "해당 날짜의 급식을 불러오지 못했습니다.";
@@ -95,7 +99,8 @@ var getTodayLunch = async function getTodayLunch(count) {
     return "해당 날짜의 오늘 급식을 불러오지 못했습니다.";
   }
 
-  return await getTodayLunch(count + 20);
+  var final = await getTodayLunch(count + 20, currentDate_obj);
+  return final;
 };
 var sendLunch = async function sendLunch() {
   var currentDate_obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;

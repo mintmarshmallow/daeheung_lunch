@@ -1,4 +1,3 @@
-console.log("sf")
 import express from "express"
 const app = express();
 import moment from "moment"
@@ -10,7 +9,7 @@ moment.tz.setDefault("Asia/Seoul");
 app.use(logger('dev', {}));
 app.use(bodyParser.json());
 const getDate = (dayPlus) => {
-    let currentDate_arr = moment().add(dayPlus, 'days').format('YYYY MM DD').split(" ");
+    let currentDate_arr = moment().add(-42, 'days').format('YYYY MM DD').split(" ");
     let currentDate_obj = {
         year: parseInt(currentDate_arr[0]),
         month: parseInt(currentDate_arr[1]),
@@ -21,6 +20,7 @@ const getDate = (dayPlus) => {
 const getLunch = async (count) => {
   try {
     const currentLunches =  await axios.get(`https://school.iamservice.net/api/article/organization/16777/group/2068031?next_token=${String(count)}`);
+    if(!currentLunches.data.articles.length) return null
     return currentLunches
   } catch (error) {
     console.error(error);
@@ -28,9 +28,13 @@ const getLunch = async (count) => {
   }
 };
 const getTodayLunch = async (count, currentDate_obj = 0) => {
+  console.log(count)
   let finalLunch;
   let lunches = await getLunch(count);
-  if(lunches === null) return "오늘 급식을 불러오지 못했습니다."
+  if(lunches === null){
+    console.log("?????");
+    return "급식을 불러오지 못했습니다."
+  }
   let lunches_with_date = lunches.data.articles.map((lunch, index, arr) => {
       let menu = "";
       lunch.content.split(" ").map((each_menu, index, arr) => {
@@ -50,16 +54,19 @@ const getTodayLunch = async (count, currentDate_obj = 0) => {
       return lunch_with_date
   })
   let last_date;
-  for(let i in lunches_with_date){
-      let lunch = lunches_with_date[i]
+  for(var i in lunches_with_date){
+      let lunch = lunches_with_date[i];
     if(lunch.date.year === currentDate_obj.year && lunch.date.month === currentDate_obj.month && lunch.date.day === currentDate_obj.day){
         finalLunch = lunch.menu;
         console.log(finalLunch)
         return finalLunch+String(lunch.date.year)+"년 " + String(lunch.date.month) + "월 " + String(lunch.date.day) +"일 급식 입니다."
     }
 
-    last_date = lunches_with_date[i].date
+    
   }
+  last_date = lunches_with_date[i].date
+  console.log("last date")
+  console.log(last_date)
 if(last_date.year < currentDate_obj.year){
     console.log("nothing same")
     return "해당 날짜의 급식을 불러오지 못했습니다."
@@ -71,7 +78,8 @@ if(last_date.year < currentDate_obj.year){
     return "해당 날짜의 오늘 급식을 불러오지 못했습니다."
 }
 
-  return await getTodayLunch(count+20)
+  let final =  await getTodayLunch(count+20, currentDate_obj);
+  return final;
 }
 const sendLunch = async(currentDate_obj = 0, res, msg = "") => {
   let result = await getTodayLunch(0, currentDate_obj);

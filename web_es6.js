@@ -115,7 +115,7 @@ apiRouter.post('/eunha', function(req, res) {
   res.status(200).send(responseBody);
 });
 apiRouter.post('/todayLunch', function(req, res) {
-  try {
+  if(req.body.action){
     let action_info = req.body.action.params//.forEach((value, key, mapObject) => console.log(key +' , ' +value));
     
     //action_info = JSON.parse(action_info.sys_date)
@@ -147,7 +147,7 @@ apiRouter.post('/todayLunch', function(req, res) {
       break;
       default: sendLunch(getDate(0),res,  "날짜 정보를 불러 오지 못해 오늘 급식을 불러 옵니다.") 
     }
-  } catch(error) {
+  } else{
     sendLunch(getDate(0),res,  "날짜 정보를 불러 오지 못해 오늘 급식을 불러 옵니다.")
   }
   console.log('todayLunch is working')

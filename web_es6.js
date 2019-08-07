@@ -1,3 +1,4 @@
+console.log("sf")
 import express from "express"
 const app = express();
 import moment from "moment"
@@ -117,9 +118,9 @@ apiRouter.post('/todayLunch', function(req, res) {
   try {
     let action_info = req.body.action.params//.forEach((value, key, mapObject) => console.log(key +' , ' +value));
     
-    action_info = JSON.parse(action_info.sys_date)
-    let allergy_info = req.body.action.알러지정보
-    console.log(allergy_info)
+    //action_info = JSON.parse(action_info.sys_date)
+    //let allergy_info = req.body.action.알러지정보
+    //console.log(allergy_info)
     switch(action_info.dateTag){
       case "today": console.log("today"); sendLunch(getDate(0)); break;
       case "tomorrow": sendLunch(getDate(1), res); break;

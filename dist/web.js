@@ -20,7 +20,7 @@ var app = (0, _express2.default)();
 
 _moment2.default.tz.setDefault("Asia/Seoul");
 var getDate = function getDate(dayPlus) {
-  var currentDate_arr = (0, _moment2.default)().add(-28, 'days').format('YYYY MM DD').split(" ");
+  var currentDate_arr = (0, _moment2.default)().add(dayPlus, 'days').format('YYYY MM DD').split(" ");
   var currentDate_obj = {
     year: parseInt(currentDate_arr[0]),
     month: parseInt(currentDate_arr[1]),
@@ -88,7 +88,7 @@ var getTodayLunch = async function getTodayLunch(count) {
 var sendLunch = async function sendLunch() {
   var currentDate_obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
   var res = arguments[1];
-  var msg = arguments[2];
+  var msg = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "";
 
   var result = await getTodayLunch(0, currentDate_obj);
   var responseBody = {
@@ -97,12 +97,12 @@ var sendLunch = async function sendLunch() {
       data: { text: "급식" },
       outputs: [{
         simpleText: {
-          text: result
+          text: msg + "\n" + result
         }
       }]
     }
   };
-  res.status(200).send(msg + "\n" + result);
+  res.status(200).send(responseBody);
 };
 
 var apiRouter = _express2.default.Router();

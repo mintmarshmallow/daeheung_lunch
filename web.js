@@ -68,7 +68,7 @@ if(last_date.year < currentDate_obj.year){
 
   return await getTodayLunch(count+20)
 }
-const sendLunch = async(currentDate_obj = 0, res, msg) => {
+const sendLunch = async(currentDate_obj = 0, res, msg = "") => {
   let result = await getTodayLunch(0, currentDate_obj);
   const responseBody = {
       version: "2.0",
@@ -77,13 +77,13 @@ const sendLunch = async(currentDate_obj = 0, res, msg) => {
         outputs: [
           {
             simpleText: {
-              text: result
+              text: msg + "\n" + result
             }
           }
         ]
       }
     };
-  res.status(200).send(msg + "\n" + result);
+  res.status(200).send(responseBody);
 }
 
 const apiRouter = express.Router();

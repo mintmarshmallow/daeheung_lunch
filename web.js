@@ -1,101 +1,89 @@
-const express = require('express');
+import express from "express"
 const app = express();
-const logger = require('morgan');
-const bodyParser = require('body-parser');
-const sanitizeHtml = require('sanitize-html');
-const request = require('request');
-const cheerio = require('cheerio');
-const v = require('voca');
-var moment = require('moment');
-
-require('moment-timezone');
-app.use(logger('dev', {}));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
+import moment from "moment"
+import 'moment-timezone';
+import axios from "axios"
 moment.tz.setDefault("Asia/Seoul");
-function getDate(dayplus){
-  let date =  moment().add(dayplus,"days").format('M D').split(" ");
-  let now_obj = {
-    month: parseInt(date[0]),
-    day: parseInt(date[1])
-  }
-  return now_obj
+const getDate = (dayPlus) => {
+    let currentDate_arr = moment().add(dayPlus, 'days').format('YYYY MM DD').split(" ");
+    let currentDate_obj = {
+        year: parseInt(currentDate_arr[0]),
+        month: parseInt(currentDate_arr[1]),
+        day: parseInt(currentDate_arr[2])
+    }
+    return currentDate_obj
 }
-url = 'https://search.naver.com/search.naver?sm=top_hty&fbm=1&ie=utf8&query=%ED%8F%AC%ED%95%AD%EB%8C%80%ED%9D%A5%EC%A4%91%EA%B8%89%EC%8B%9D'
-
-function getLunch(req, res,allergy, date ,message /*callback*/){
-  request({url: url}, function (err, res_lunch, body) {
-    let correct_lunch;
-    const $ = cheerio.load(body, {decodeEntities: true});
-    const $each_menu_info = $('div.school_menu._page_panel ul')
-    let lunches = []
-    $each_menu_info.find('li.menu_info').each(function(index, elem){
-      let date_in_strong = $(this).find('strong').text()
-  
-      let date_string = v.trim(date_in_strong)
-      let date_month_and_day= date_in_strong.replace("월", "").replace("일", "").split(" ")
-      let lunch = ""
-      $(this).find('ul li').each(function(index, elem){
-        each_lunch_menu = v.trim($(this).text());
-        lunch = lunch + each_lunch_menu + "\n"
-        
-  
+const getLunch = async (count) => {
+  try {
+    const currentLunches =  await axios.get(`https://school.iamservice.net/api/article/organization/16777/group/2068031?next_token=${String(count)}`);
+    return currentLunches
+  } catch (error) {
+    console.error(error);
+    return null
+  }
+};
+const getTodayLunch = async (count, currentDate_obj = 0) => {
+  let finalLunch;
+  let lunches = await getLunch(count);
+  if(lunches === null) return "오늘 급식을 불러오지 못했습니다."
+  let lunches_with_date = lunches.data.articles.map((lunch, index, arr) => {
+      let menu = "";
+      lunch.content.split(" ").map((each_menu, index, arr) => {
+        menu = menu + each_menu + "\n"
       })
+      let date_arr = lunch.local_date_of_pub_date.split(".");
+
       let lunch_with_date = {
-        menu: lunch,
         date:{
-          month: parseInt(date_month_and_day[0]),
-          day: parseInt(date_month_and_day[1])
-        }
+            year: parseInt(date_arr[0]),
+            month: parseInt(date_arr[1]),
+            day: parseInt(date_arr[2])
+        },
+        menu:menu
+
       }
-      lunches.push(lunch_with_date)
-      
-  
-  
-    })
-  
-    for(lunch in lunches){
-  
-      if(lunches[lunch].date.month === date.month && lunches[lunch].date.day === date.day){
-        correct_lunch = lunches[lunch]
-        break;
-      }
+      return lunch_with_date
+  })
+  let last_date;
+  for(let i in lunches_with_date){
+      let lunch = lunches_with_date[i]
+    if(lunch.date.year === currentDate_obj.year && lunch.date.month === currentDate_obj.month && lunch.date.day === currentDate_obj.day){
+        finalLunch = lunch.menu;
+        console.log(finalLunch)
+        return finalLunch+String(lunch.date.year)+"년 " + String(lunch.date.month) + "월 " + String(lunch.date.day) +"일 급식 입니다."
     }
-    
-    if(correct_lunch !== undefined){
-      lunch_str = (message? message : "")+`\n${correct_lunch.date.month}월 ${correct_lunch.date.day}일 급식:\n${correct_lunch.menu}`
-    } else {
-      lunch_str = (message? message : "")+"\n죄송합니다. 해당하는 날짜의 급식을 불러 오지 못했습니다."
-    }
-  
-    //callback(lunch_str)
-    const responseBody = {
+
+    last_date = lunches_with_date[i].date
+  }
+if(last_date.year < currentDate_obj.year){
+    console.log("nothing same")
+    return "해당 날짜의 급식을 불러오지 못했습니다."
+} else if(last_date.year === currentDate_obj.year && last_date.month < currentDate_obj.month){
+    console.log("year same")
+    return "해당 날짜의 오늘 급식을 불러오지 못했습니다."
+} else if(last_date.year === currentDate_obj.year && last_date.month === currentDate_obj.month && last_date.day < currentDate_obj.day){
+    console.log("month same")
+    return "해당 날짜의 오늘 급식을 불러오지 못했습니다."
+}
+
+  return await getTodayLunch(count+20)
+}
+const sendLunch = async(currentDate_obj = 0, res, msg) => {
+  let result = await getTodayLunch(0, currentDate_obj);
+  const responseBody = {
       version: "2.0",
       template: {
-        data:{text:lunch_str},
+        data:{text:"급식"},
         outputs: [
           {
             simpleText: {
-              text: lunch_str
+              text: result
             }
           }
         ]
       }
     };
-    res.status(200).send(responseBody);
-  
-    /*const content = sanitizeHtml(lunches, {
-      parser: {
-        decodeEntities: true
-      }
-    });*/
-  
-  
-    //console.log(content);
-
-  });
+  res.status(200).send(msg + "\n" + result);
 }
 
 const apiRouter = express.Router();
@@ -126,35 +114,41 @@ apiRouter.post('/eunha', function(req, res) {
   res.status(200).send(responseBody);
 });
 apiRouter.post('/todayLunch', function(req, res) {
-  if(req.body.action){
+  try {
     let action_info = req.body.action.params//.forEach((value, key, mapObject) => console.log(key +' , ' +value));
     
     action_info = JSON.parse(action_info.sys_date)
     let allergy_info = req.body.action.알러지정보
     console.log(allergy_info)
     switch(action_info.dateTag){
-      case "today": console.log("today");date = getLunch(req, res, allergy_info ,getDate(0)); break;
-      case "tomorrow": date = getLunch(req, res, allergy_info ,getDate(1)); break;
-      case "yesterday": date = getLunch(req, res, allergy_info ,getDate(-1)); break;
+      case "today": console.log("today"); sendLunch(getDate(0)); break;
+      case "tomorrow": sendLunch(getDate(1), res); break;
+      case "yesterday": sendLunch(getDate(-1), res); break;
       case null: if(action_info.month && action_info.day){
-        let date = {
-          month: parseInt(action_info.month),
-          day: parseInt(action_info.day),
+        if(action_info.year === null){
+          let date = {
+            year: getDate(0).year,
+            month: parseInt(action_info.month),
+            day: parseInt(action_info.day),
+          }
+          sendLunch(date, res);
+          break;
+        } else {
+          let date = {
+            year: parseInt(action_info.year),
+            month: parseInt(action_info.month),
+            day: parseInt(action_info.day),
+          }
+          sendLunch(date, res);
+          break;
         }
-        getLunch(req, res, allergy_info, date);
-        break;
       }
       break;
-      default: getLunch(req, res , allergy_info,getDate(0), "날짜 정보를 불러 오지 못해 오늘 급식을 불러 옵니다.") 
+      default: sendLunch(getDate(0),res,  "날짜 정보를 불러 오지 못해 오늘 급식을 불러 옵니다.") 
     }
-  } else {
-    getLunch(req, res , null,getDate(0), "날짜 정보를 불러 오지 못해 오늘 급식을 불러 옵니다.")
+  } catch(error) {
+    sendLunch(getDate(0),res,  "날짜 정보를 불러 오지 못해 오늘 급식을 불러 옵니다.")
   }
-  
-  
-  
-  
-  
   console.log('todayLunch is working')
 });
 
@@ -162,5 +156,5 @@ apiRouter.post('/todayLunch', function(req, res) {
 /*app.listen(1337, function() {
   console.log('Example skill server listening on port 3000!');
 });*/
-port = 8001
+const port = 8001
 app.listen(process.env.PORT || port)

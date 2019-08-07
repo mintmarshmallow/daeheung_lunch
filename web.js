@@ -133,10 +133,11 @@ apiRouter.post('/eunha', function (req, res) {
   res.status(200).send(responseBody);
 });
 apiRouter.post('/todayLunch', function (req, res) {
+  console.log(req.body);
   if (req.body.action) {
     var action_info = req.body.action.params; //.forEach((value, key, mapObject) => console.log(key +' , ' +value));
 
-    //action_info = JSON.parse(action_info.sys_date)
+    action_info = JSON.parse(action_info.sys_date);
     //let allergy_info = req.body.action.알러지정보
     //console.log(allergy_info)
     switch (action_info.dateTag) {

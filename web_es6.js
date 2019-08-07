@@ -3,8 +3,12 @@ import express from "express"
 const app = express();
 import moment from "moment"
 import 'moment-timezone';
-import axios from "axios"
+import axios from "axios";
+import logger from 'morgan';
+import bodyParser from'body-parser';
 moment.tz.setDefault("Asia/Seoul");
+app.use(logger('dev', {}));
+app.use(bodyParser.json());
 const getDate = (dayPlus) => {
     let currentDate_arr = moment().add(dayPlus, 'days').format('YYYY MM DD').split(" ");
     let currentDate_obj = {

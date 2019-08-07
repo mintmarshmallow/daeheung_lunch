@@ -14,6 +14,14 @@ var _axios = require("axios");
 
 var _axios2 = _interopRequireDefault(_axios);
 
+var _morgan = require("morgan");
+
+var _morgan2 = _interopRequireDefault(_morgan);
+
+var _bodyParser = require("body-parser");
+
+var _bodyParser2 = _interopRequireDefault(_bodyParser);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 console.log("sf");
@@ -21,6 +29,8 @@ console.log("sf");
 var app = (0, _express2.default)();
 
 _moment2.default.tz.setDefault("Asia/Seoul");
+app.use((0, _morgan2.default)('dev', {}));
+app.use(_bodyParser2.default.json());
 var getDate = function getDate(dayPlus) {
   var currentDate_arr = (0, _moment2.default)().add(dayPlus, 'days').format('YYYY MM DD').split(" ");
   var currentDate_obj = {

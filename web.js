@@ -16,6 +16,8 @@ var _axios2 = _interopRequireDefault(_axios);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+console.log("sf");
+
 var app = (0, _express2.default)();
 
 _moment2.default.tz.setDefault("Asia/Seoul");
@@ -134,9 +136,9 @@ apiRouter.post('/todayLunch', function (req, res) {
   try {
     var action_info = req.body.action.params; //.forEach((value, key, mapObject) => console.log(key +' , ' +value));
 
-    action_info = JSON.parse(action_info.sys_date);
-    var allergy_info = req.body.action.알러지정보;
-    console.log(allergy_info);
+    //action_info = JSON.parse(action_info.sys_date)
+    //let allergy_info = req.body.action.알러지정보
+    //console.log(allergy_info)
     switch (action_info.dateTag) {
       case "today":
         console.log("today");sendLunch(getDate(0));break;

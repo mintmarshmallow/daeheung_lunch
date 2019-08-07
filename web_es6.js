@@ -9,7 +9,7 @@ moment.tz.setDefault("Asia/Seoul");
 app.use(logger('dev', {}));
 app.use(bodyParser.json());
 const getDate = (dayPlus) => {
-    let currentDate_arr = moment().add(-42, 'days').format('YYYY MM DD').split(" ");
+    let currentDate_arr = moment().add(0, 'days').format('YYYY MM DD').split(" ");
     let currentDate_obj = {
         year: parseInt(currentDate_arr[0]),
         month: parseInt(currentDate_arr[1]),
@@ -135,7 +135,7 @@ apiRouter.post('/todayLunch', function(req, res) {
     //let allergy_info = req.body.action.알러지정보
     //console.log(allergy_info)
     switch(action_info.dateTag){
-      case "today": console.log("today"); sendLunch(getDate(0)); break;
+      case "today": console.log("today"); sendLunch(getDate(0), res); break;
       case "tomorrow": sendLunch(getDate(1), res); break;
       case "yesterday": sendLunch(getDate(-1), res); break;
       case null: if(action_info.month && action_info.day){

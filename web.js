@@ -30,7 +30,7 @@ _moment2.default.tz.setDefault("Asia/Seoul");
 app.use((0, _morgan2.default)('dev', {}));
 app.use(_bodyParser2.default.json());
 var getDate = function getDate(dayPlus) {
-  var currentDate_arr = (0, _moment2.default)().add(-42, 'days').format('YYYY MM DD').split(" ");
+  var currentDate_arr = (0, _moment2.default)().add(0, 'days').format('YYYY MM DD').split(" ");
   var currentDate_obj = {
     year: parseInt(currentDate_arr[0]),
     month: parseInt(currentDate_arr[1]),
@@ -157,7 +157,7 @@ apiRouter.post('/todayLunch', function (req, res) {
     //console.log(allergy_info)
     switch (action_info.dateTag) {
       case "today":
-        console.log("today");sendLunch(getDate(0));break;
+        console.log("today");sendLunch(getDate(0), res);break;
       case "tomorrow":
         sendLunch(getDate(1), res);break;
       case "yesterday":

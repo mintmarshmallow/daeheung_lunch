@@ -8,8 +8,47 @@ import bodyParser from'body-parser';
 moment.tz.setDefault("Asia/Seoul");
 app.use(logger('dev', {}));
 app.use(bodyParser.json());
+const getNoticeAndLetter = async (group) => {
+  let groupNum;
+  if(group === "notice") {
+    groupNum = '2068028';
+  } else if(group === "letter"){
+    groupNum = '2068029';
+  }
+  try {
+    const content =  await axios.get(`https://school.iamservice.net/api/article/organization/16777/group/${groupNum}?next_token=0`);
+    if(!content.data.articles.length) return null
+    return content
+  } catch (error) {
+    console.error(error);
+    return null
+  }
+}
+const sendNoticeAndLetter = async (group = "notice",limit=3,  res) => {
+  const content = await getNoticeAndLetter(group);
+  if(!content) {
+    res.status(200).send("")
+  }
+  let final = content.data.articles.slice(0, limit).map((value) => {
+    return `대흥중학교 ${value.group_name}\n제목: ${value.title}   작성자:${value.author}\n${value.content}\n ${value.files.map((value) => value.title +"\n"+ value.url+"\n")} 최종 업데이트: ${value.updated_at}`
+  });
+  const responseBody = {
+    version: "2.0",
+    template: {
+      data:{text:group},
+      outputs: [
+        {
+          simpleText: {
+            text: final
+          }
+        }
+      ]
+    }
+  };
+  res.status(200).send(responseBody)
+}
 const getDate = (dayPlus) => {
-    let currentDate_arr = moment().add(0, 'days').format('YYYY MM DD').split(" ");
+    let currentDate_arr = moment().add(dayPlus, 'days').format('YYYY MM DD').split(" ");
     let currentDate_obj = {
         year: parseInt(currentDate_arr[0]),
         month: parseInt(currentDate_arr[1]),
@@ -72,10 +111,10 @@ if(last_date.year < currentDate_obj.year){
     return "해당 날짜의 급식을 불러오지 못했습니다."
 } else if(last_date.year === currentDate_obj.year && last_date.month < currentDate_obj.month){
     console.log("year same")
-    return "해당 날짜의 오늘 급식을 불러오지 못했습니다."
+    return "해당 날짜의 급식을 불러오지 못했습니다."
 } else if(last_date.year === currentDate_obj.year && last_date.month === currentDate_obj.month && last_date.day < currentDate_obj.day){
     console.log("month same")
-    return "해당 날짜의 오늘 급식을 불러오지 못했습니다."
+    return "해당 날짜의 급식을 불러오지 못했습니다."
 }
 
   let final =  await getTodayLunch(count+20, currentDate_obj);
@@ -105,6 +144,13 @@ app.use('/api', apiRouter);
 app.get('/', function(req, res){
     console.log('app.get is working')
     res.send('Hello World');
+})
+
+apiRouter.post('/notice', function(req, res){
+  sendNoticeAndLetter("notice", 3, res)
+})
+apiRouter.post('/letter', function(req, res){
+  sendNoticeAndLetter("letter", 3, res)
 })
 
 apiRouter.post('/eunha', function(req, res) {

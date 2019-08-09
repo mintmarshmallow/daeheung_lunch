@@ -33,7 +33,7 @@ const sendNoticeAndLetter = async (group = "notice",limit=3,  res) => {
     return `대흥중학교 ${value.group_name}\n제목: ${value.title}   작성자:${value.author}\n${value.content}\n ${value.files.map((value) => value.title +"\n"+ value.url+"\n")} 최종 업데이트: ${value.updated_at}`
   });
   let finalText = "";
-  final.map((value) => finalText = finalText + value + "\n")
+  final.map((value) => finalText = finalText + value + "\n\n\n\n\n\n")
   const responseBody = {
     version: "2.0",
     template: {

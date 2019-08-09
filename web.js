@@ -61,7 +61,7 @@ var sendNoticeAndLetter = async function sendNoticeAndLetter() {
   });
   var finalText = "";
   final.map(function (value) {
-    return finalText = finalText + value + "\n";
+    return finalText = finalText + value + "\n\n\n\n\n\n";
   });
   var responseBody = {
     version: "2.0",

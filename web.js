@@ -59,13 +59,17 @@ var sendNoticeAndLetter = async function sendNoticeAndLetter() {
       return value.title + "\n" + value.url + "\n";
     }) + " \uCD5C\uC885 \uC5C5\uB370\uC774\uD2B8: " + value.updated_at;
   });
+  var finalText = "";
+  final.map(function (value) {
+    return finalText = finalText + value + "\n";
+  });
   var responseBody = {
     version: "2.0",
     template: {
       data: { text: group },
       outputs: [{
         simpleText: {
-          text: final
+          text: finalText
         }
       }]
     }

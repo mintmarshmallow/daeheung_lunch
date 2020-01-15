@@ -109,7 +109,6 @@ const getTodayLunch = async (count, currentDate_obj = 0) => {
   }
   last_date = lunches_with_date[i].date
   console.log("last date")
-  console.log(last_date)
 if(last_date.year < currentDate_obj.year){
     console.log("nothing same")
     return "해당 날짜의 급식을 불러오지 못했습니다."
@@ -158,7 +157,6 @@ apiRouter.post('/letter', function(req, res){
 })
 
 apiRouter.post('/eunha', function(req, res) {
-  console.log(req.body);
   
   const responseBody = {
     version: "2.0",
@@ -177,7 +175,6 @@ apiRouter.post('/eunha', function(req, res) {
   res.status(200).send(responseBody);
 });
 apiRouter.post('/todayLunch', function(req, res) {
-  console.log(req.body)
   if(req.body.action){
     let action_info = req.body.action.params//.forEach((value, key, mapObject) => console.log(key +' , ' +value));
     

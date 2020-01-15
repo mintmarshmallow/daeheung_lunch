@@ -17,6 +17,8 @@ const getNoticeAndLetter = async (group) => {
   }
   try {
     const content =  await axios.get(`https://school.iamservice.net/api/article/organization/16777/group/${groupNum}?next_token=0`);
+    console.log(content.data+'\n\n\n\n\n\n\n');
+    console.log(content.article);
     if(!content.data.articles.length) return null
     return content
   } catch (error) {

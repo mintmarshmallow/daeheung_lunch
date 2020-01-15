@@ -60,6 +60,7 @@ const getDate = (dayPlus) => {
     }
     return currentDate_obj
 }
+
 const getLunch = async (count) => {
   try {
     const currentLunches =  await axios.get(`https://school.iamservice.net/api/article/organization/16777/group/2068031?next_token=${String(count)}`);

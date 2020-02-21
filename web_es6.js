@@ -134,7 +134,7 @@ const getTodayLunch = async (count, currentDate_obj = 0, schoolInfo, todayLimit=
         todayLimit++
       }else if(todayLimit === 3){
         let finalString;
-        for(finalLunch in lunch){
+        for(let lunch in finalLunch){
           finalString += lunch.menu+"\n"+String(lunch.date.year)+"년 " + String(lunch.date.month) + "월 " + String(lunch.date.day) +"일"+ `${lunch.kind} 입니다.\n\n`
         }
         return finalString
@@ -215,7 +215,6 @@ apiRouter.post('/todayLunch', function(req, res) {
     schoolName,
     schoolKind
   }
-  console.log(req.body)
   if(req.body.action){
     let action_info = req.body.action.params//.forEach((value, key, mapObject) => console.log(key +' , ' +value));
     

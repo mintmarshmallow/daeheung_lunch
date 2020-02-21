@@ -166,8 +166,8 @@ var getTodayLunch = async function getTodayLunch(count) {
       todayLimit++;
     } else if (todayLimit === 3) {
       var finalString = void 0;
-      for (finalLunch in lunch) {
-        finalString += lunch.menu + "\n" + String(lunch.date.year) + "년 " + String(lunch.date.month) + "월 " + String(lunch.date.day) + "일" + (lunch.kind + " \uC785\uB2C8\uB2E4.\n\n");
+      for (var _lunch in finalLunch) {
+        finalString += _lunch.menu + "\n" + String(_lunch.date.year) + "년 " + String(_lunch.date.month) + "월 " + String(_lunch.date.day) + "일" + (_lunch.kind + " \uC785\uB2C8\uB2E4.\n\n");
       }
       return finalString;
     }
@@ -248,7 +248,6 @@ apiRouter.post('/todayLunch', function (req, res) {
     schoolName: schoolName,
     schoolKind: schoolKind
   };
-  console.log(req.body);
   if (req.body.action) {
     var action_info = req.body.action.params; //.forEach((value, key, mapObject) => console.log(key +' , ' +value));
 

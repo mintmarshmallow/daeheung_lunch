@@ -166,8 +166,8 @@ var getTodayLunch = async function getTodayLunch(count) {
       todayLimit++;
     } else if (todayLimit === 3) {
       var finalString = void 0;
-      for (var _lunch in finalLunch) {
-        finalString += _lunch.menu + "\n" + String(_lunch.date.year) + "년 " + String(_lunch.date.month) + "월 " + String(_lunch.date.day) + "일" + (_lunch.kind + " \uC785\uB2C8\uB2E4.\n\n");
+      for (var _i in finalLunch) {
+        finalString += finalLunch[_i].menu + "\n" + String(finalLunch[_i].date.year) + "년 " + String(finalLunch[_i].date.month) + "월 " + String(finalLunch[_i].date.day) + "일" + (finalLunch[_i].kind + " \uC785\uB2C8\uB2E4.\n\n");
       }
       return finalString;
     }

@@ -118,7 +118,7 @@ var getTodayLunch = async function getTodayLunch(count) {
   var currentDate_obj = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
   var schoolInfo = arguments[2];
   var todayLimit = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-  var finalLunch = arguments[4];
+  var finalLunch = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : [];
 
   console.log(count);
   var lunches = await getLunch(count, schoolInfo);
@@ -252,6 +252,7 @@ apiRouter.post('/todayLunch', function (req, res) {
     schoolName: schoolName,
     schoolKind: schoolKind
   };
+  console.log(req.body);
   if (req.body.action) {
     var action_info = req.body.action.params; //.forEach((value, key, mapObject) => console.log(key +' , ' +value));
 

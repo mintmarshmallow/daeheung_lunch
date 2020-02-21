@@ -135,7 +135,7 @@ const getTodayLunch = async (count, currentDate_obj = 0, schoolInfo, todayLimit=
       }else if(todayLimit === 3){
         let finalString;
         for(finalLunch in lunch){
-          finalString += lunch.menu+"\n"+String(lunch.date.year)+"년 " + String(lunch.date.month) + "월 " + String(lunch.date.day) +일 `${lunch.kind} 입니다.\n\n`
+          finalString += lunch.menu+"\n"+String(lunch.date.year)+"년 " + String(lunch.date.month) + "월 " + String(lunch.date.day) +"일"+ `${lunch.kind} 입니다.\n\n`
         }
         return finalString
       } 

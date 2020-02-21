@@ -1,7 +1,5 @@
 "use strict";
 
-var _templateObject = _taggedTemplateLiteral(["", " \uC785\uB2C8\uB2E4.\n\n"], ["", " \uC785\uB2C8\uB2E4.\\n\\n"]);
-
 var _express = require("express");
 
 var _express2 = _interopRequireDefault(_express);
@@ -25,8 +23,6 @@ var _bodyParser = require("body-parser");
 var _bodyParser2 = _interopRequireDefault(_bodyParser);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
 var app = (0, _express2.default)();
 
@@ -91,22 +87,9 @@ var getDate = function getDate(dayPlus) {
   };
   return currentDate_obj;
 };
-
-var getLunch = async function getLunch(count, schoolInfo) {
-  var url = void 0;
-  switch (schoolInfo.schoolName) {
-    case "pohang-daeheung-middle":
-      url = "https://school.iamservice.net/api/article/organization/16777/group/2068031?next_token=";
-      break;
-    case "pohang-joongang-high":
-      url = "https://school.iamservice.net/api/article/organization/16086/group/2062519?next_token=";
-      break;
-    default:
-      console.log("Can not find schoolName");
-      throw new Error("Can not find schoolName");
-  }
+var getLunch = async function getLunch(count) {
   try {
-    var currentLunches = await _axios2.default.get(url + String(count));
+    var currentLunches = await _axios2.default.get("https://school.iamservice.net/api/article/organization/16777/group/2068031?next_token=" + String(count));
     if (!currentLunches.data.articles.length) return null;
     return currentLunches;
   } catch (error) {
@@ -116,12 +99,10 @@ var getLunch = async function getLunch(count, schoolInfo) {
 };
 var getTodayLunch = async function getTodayLunch(count) {
   var currentDate_obj = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-  var schoolInfo = arguments[2];
-  var todayLimit = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-  var finalLunch = arguments[4];
 
   console.log(count);
-  var lunches = await getLunch(count, schoolInfo);
+  var finalLunch = void 0;
+  var lunches = await getLunch(count);
   if (lunches === null) {
     console.log("?????");
     return "급식을 불러오지 못했습니다.";
@@ -139,45 +120,23 @@ var getTodayLunch = async function getTodayLunch(count) {
         month: parseInt(date_arr[1]),
         day: parseInt(date_arr[2])
       },
-      menu: menu,
-      kind: lunch.author
+      menu: menu
 
     };
     return lunch_with_date;
   });
   var last_date = void 0;
-  // todayLimit 오늘 급식은 중식, 석식 두 가지 둘 다 불러오려면 해당 변수 필요함
-  //3개의 급식을 불러오기 위해 request를 1번 더 보내야 하는 경우도 생길 수 있으므로 추후 리팩토링 요구
   for (var i in lunches_with_date) {
     var lunch = lunches_with_date[i];
-    if (todayLimit === 0) {
-      if (lunch.date.year === currentDate_obj.year && lunch.date.month === currentDate_obj.month && lunch.date.day === currentDate_obj.day) {
-        finalLunch.push(lunch);
-        console.log(finalLunch);
-        todayLimit++;
-      }
-    } else if (todayLimit === 1) {
-      if (lunch.date.year === currentDate_obj.year && lunch.date.month === currentDate_obj.month && lunch.date.day === currentDate_obj.day) {
-        finalLunch.push(lunch);
-        console.log(finalLunch);
-      }
-      todayLimit++;
-    } else if (todayLimit === 2) {
-      if (lunch.date.year === currentDate_obj.year && lunch.date.month === currentDate_obj.month && lunch.date.day === currentDate_obj.day) {
-        finalLunch.push(lunch);
-        console.log(finalLunch);
-      }
-      todayLimit++;
-    } else if (todayLimit === 3) {
-      var finalString = void 0;
-      for (finalLunch in lunch) {
-        finalString += lunch.menu + "\n" + String(lunch.date.year) + "년 " + String(lunch.date.month) + "월 " + String(lunch.date.day) + 일(_templateObject, lunch.kind);
-      }
-      return finalString;
+    if (lunch.date.year === currentDate_obj.year && lunch.date.month === currentDate_obj.month && lunch.date.day === currentDate_obj.day) {
+      finalLunch = lunch.menu;
+      console.log(finalLunch);
+      return finalLunch + String(lunch.date.year) + "년 " + String(lunch.date.month) + "월 " + String(lunch.date.day) + "일 급식 입니다.";
     }
   }
   last_date = lunches_with_date[i].date;
   console.log("last date");
+  console.log(last_date);
   if (last_date.year < currentDate_obj.year) {
     console.log("nothing same");
     return "해당 날짜의 급식을 불러오지 못했습니다.";
@@ -189,16 +148,15 @@ var getTodayLunch = async function getTodayLunch(count) {
     return "해당 날짜의 급식을 불러오지 못했습니다.";
   }
 
-  var final = await getTodayLunch(count + 20, currentDate_obj, schoolInfo, todayLimit, finalLunch);
+  var final = await getTodayLunch(count + 20, currentDate_obj);
   return final;
 };
 var sendLunch = async function sendLunch() {
   var currentDate_obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
   var res = arguments[1];
-  var schoolInfo = arguments[2];
-  var msg = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "";
+  var msg = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "";
 
-  var result = await getTodayLunch(0, currentDate_obj, schoolInfo);
+  var result = await getTodayLunch(0, currentDate_obj);
   var responseBody = {
     version: "2.0",
     template: {
@@ -229,6 +187,7 @@ apiRouter.post('/letter', function (req, res) {
 });
 
 apiRouter.post('/eunha', function (req, res) {
+  console.log(req.body);
 
   var responseBody = {
     version: "2.0",
@@ -245,13 +204,7 @@ apiRouter.post('/eunha', function (req, res) {
   res.status(200).send(responseBody);
 });
 apiRouter.post('/todayLunch', function (req, res) {
-  var schoolName = req.header("schoolName");
-  var schoolKind = req.header("schoolKind");
-  console.log(schoolName);
-  var schoolInfo = {
-    schoolName: schoolName,
-    schoolKind: schoolKind
-  };
+  console.log(req.body);
   if (req.body.action) {
     var action_info = req.body.action.params; //.forEach((value, key, mapObject) => console.log(key +' , ' +value));
 
@@ -260,11 +213,11 @@ apiRouter.post('/todayLunch', function (req, res) {
     //console.log(allergy_info)
     switch (action_info.dateTag) {
       case "today":
-        console.log("today");sendLunch(getDate(0), res, schoolInfo);break;
+        console.log("today");sendLunch(getDate(0), res);break;
       case "tomorrow":
-        sendLunch(getDate(1), res, schoolInfo);break;
+        sendLunch(getDate(1), res);break;
       case "yesterday":
-        sendLunch(getDate(-1), res, schoolInfo);break;
+        sendLunch(getDate(-1), res);break;
       case null:
         if (action_info.month && action_info.day) {
           if (action_info.year === null) {
@@ -273,7 +226,7 @@ apiRouter.post('/todayLunch', function (req, res) {
               month: parseInt(action_info.month),
               day: parseInt(action_info.day)
             };
-            sendLunch(date, res, schoolInfo);
+            sendLunch(date, res);
             break;
           } else {
             var _date = {
@@ -281,16 +234,16 @@ apiRouter.post('/todayLunch', function (req, res) {
               month: parseInt(action_info.month),
               day: parseInt(action_info.day)
             };
-            sendLunch(_date, res, schoolInfo);
+            sendLunch(_date, res);
             break;
           }
         }
         break;
       default:
-        sendLunch(getDate(0), res, schoolInfo, "날짜 정보를 불러 오지 못해 오늘 급식을 불러 옵니다.");
+        sendLunch(getDate(0), res, "날짜 정보를 불러 오지 못해 오늘 급식을 불러 옵니다.");
     }
   } else {
-    sendLunch(getDate(0), res, schoolInfo, "날짜 정보를 불러 오지 못해 오늘 급식을 불러 옵니다.");
+    sendLunch(getDate(0), res, "날짜 정보를 불러 오지 못해 오늘 급식을 불러 옵니다.");
   }
   console.log('todayLunch is working');
 });

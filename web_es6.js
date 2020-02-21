@@ -83,7 +83,7 @@ const getLunch = async (count, schoolInfo) => {
     return null
   }
 };
-const getTodayLunch = async (count, currentDate_obj = 0, schoolInfo, todayLimit=0, finalLunch) => {
+const getTodayLunch = async (count, currentDate_obj = 0, schoolInfo, todayLimit=0, finalLunch=[]) => {
   console.log(count)
   let lunches = await getLunch(count, schoolInfo);
   if(lunches === null){
@@ -215,6 +215,7 @@ apiRouter.post('/todayLunch', function(req, res) {
     schoolName,
     schoolKind
   }
+  console.log(req.body)
   if(req.body.action){
     let action_info = req.body.action.params//.forEach((value, key, mapObject) => console.log(key +' , ' +value));
     

@@ -61,9 +61,21 @@ const getDate = (dayPlus) => {
     return currentDate_obj
 }
 
-const getLunch = async (count) => {
+const getLunch = async (count, schoolInfo) => {
+  let url;
+  switch(schoolInfo.schoolName) {
+    case "pohang-daeheung-middle":
+      url = "https://school.iamservice.net/api/article/organization/16777/group/2068031?next_token="
+      break;
+    case "pohang-joongang-high":
+      url = "https://school.iamservice.net/api/article/organization/16086/group/2062519?next_token="
+      break;
+    default:
+      console.log("Can not find schoolName")
+      throw new Error("Can not find schoolName");
+  }
   try {
-    const currentLunches =  await axios.get(`https://school.iamservice.net/api/article/organization/16777/group/2068031?next_token=${String(count)}`);
+    const currentLunches =  await axios.get(url+String(count));
     if(!currentLunches.data.articles.length) return null
     return currentLunches
   } catch (error) {
@@ -71,10 +83,9 @@ const getLunch = async (count) => {
     return null
   }
 };
-const getTodayLunch = async (count, currentDate_obj = 0) => {
+const getTodayLunch = async (count, currentDate_obj = 0, schoolInfo, todayLimit=0, finalLunch) => {
   console.log(count)
-  let finalLunch;
-  let lunches = await getLunch(count);
+  let lunches = await getLunch(count, schoolInfo);
   if(lunches === null){
     console.log("?????");
     return "급식을 불러오지 못했습니다."
@@ -92,40 +103,61 @@ const getTodayLunch = async (count, currentDate_obj = 0) => {
             month: parseInt(date_arr[1]),
             day: parseInt(date_arr[2])
         },
-        menu:menu
+        menu:menu,
+        kind: lunch.author
 
       }
       return lunch_with_date
   })
   let last_date;
+  // todayLimit 오늘 급식은 중식, 석식 두 가지 둘 다 불러오려면 해당 변수 필요함
+  //3개의 급식을 불러오기 위해 request를 1번 더 보내야 하는 경우도 생길 수 있으므로 추후 리팩토링 요구
   for(var i in lunches_with_date){
       let lunch = lunches_with_date[i];
-    if(lunch.date.year === currentDate_obj.year && lunch.date.month === currentDate_obj.month && lunch.date.day === currentDate_obj.day){
-        finalLunch = lunch.menu;
-        console.log(finalLunch)
-        return finalLunch+String(lunch.date.year)+"년 " + String(lunch.date.month) + "월 " + String(lunch.date.day) +"일 급식 입니다."
-    }
-
-    
+      if(todayLimit === 0){
+        if(lunch.date.year === currentDate_obj.year && lunch.date.month === currentDate_obj.month && lunch.date.day === currentDate_obj.day){
+          finalLunch.push(lunch);
+          console.log(finalLunch)
+          todayLimit++           
+        }
+      } else if(todayLimit === 1){
+        if(lunch.date.year === currentDate_obj.year && lunch.date.month === currentDate_obj.month && lunch.date.day === currentDate_obj.day){
+          finalLunch.push(lunch);
+          console.log(finalLunch);
+        }
+        todayLimit++
+      } else if(todayLimit === 2){
+        if(lunch.date.year === currentDate_obj.year && lunch.date.month === currentDate_obj.month && lunch.date.day === currentDate_obj.day){
+          finalLunch.push(lunch);
+          console.log(finalLunch);
+        }
+        todayLimit++
+      }else if(todayLimit === 3){
+        let finalString;
+        for(finalLunch in lunch){
+          finalString += lunch.menu+"\n"+String(lunch.date.year)+"년 " + String(lunch.date.month) + "월 " + String(lunch.date.day) +일 `${lunch.kind} 입니다.\n\n`
+        }
+        return finalString
+      } 
   }
   last_date = lunches_with_date[i].date
   console.log("last date")
-if(last_date.year < currentDate_obj.year){
+  if(last_date.year < currentDate_obj.year){
     console.log("nothing same")
     return "해당 날짜의 급식을 불러오지 못했습니다."
-} else if(last_date.year === currentDate_obj.year && last_date.month < currentDate_obj.month){
+  } else if(last_date.year === currentDate_obj.year && last_date.month < currentDate_obj.month){
     console.log("year same")
     return "해당 날짜의 급식을 불러오지 못했습니다."
-} else if(last_date.year === currentDate_obj.year && last_date.month === currentDate_obj.month && last_date.day < currentDate_obj.day){
+  } else if(last_date.year === currentDate_obj.year && last_date.month === currentDate_obj.month && last_date.day < currentDate_obj.day){
     console.log("month same")
     return "해당 날짜의 급식을 불러오지 못했습니다."
 }
 
-  let final =  await getTodayLunch(count+20, currentDate_obj);
+  let final =  await getTodayLunch(count+20, currentDate_obj, schoolInfo, todayLimit, finalLunch);
   return final;
 }
-const sendLunch = async(currentDate_obj = 0, res, msg = "") => {
-  let result = await getTodayLunch(0, currentDate_obj);
+const sendLunch = async(currentDate_obj = 0, res, schoolInfo,  msg = "") => {
+  let result = await getTodayLunch(0, currentDate_obj, schoolInfo);
   const responseBody = {
       version: "2.0",
       template: {
@@ -176,6 +208,13 @@ apiRouter.post('/eunha', function(req, res) {
   res.status(200).send(responseBody);
 });
 apiRouter.post('/todayLunch', function(req, res) {
+  const schoolName = req.header("schoolName");
+  const schoolKind = req.header("schoolKind");
+  console.log(schoolName)
+  const schoolInfo = {
+    schoolName,
+    schoolKind
+  }
   if(req.body.action){
     let action_info = req.body.action.params//.forEach((value, key, mapObject) => console.log(key +' , ' +value));
     
@@ -183,9 +222,9 @@ apiRouter.post('/todayLunch', function(req, res) {
     //let allergy_info = req.body.action.알러지정보
     //console.log(allergy_info)
     switch(action_info.dateTag){
-      case "today": console.log("today"); sendLunch(getDate(0), res); break;
-      case "tomorrow": sendLunch(getDate(1), res); break;
-      case "yesterday": sendLunch(getDate(-1), res); break;
+      case "today": console.log("today"); sendLunch(getDate(0), res, schoolInfo); break;
+      case "tomorrow": sendLunch(getDate(1), res, schoolInfo); break;
+      case "yesterday": sendLunch(getDate(-1), res, schoolInfo); break;
       case null: if(action_info.month && action_info.day){
         if(action_info.year === null){
           let date = {
@@ -193,7 +232,7 @@ apiRouter.post('/todayLunch', function(req, res) {
             month: parseInt(action_info.month),
             day: parseInt(action_info.day),
           }
-          sendLunch(date, res);
+          sendLunch(date, res, schoolInfo);
           break;
         } else {
           let date = {
@@ -201,15 +240,15 @@ apiRouter.post('/todayLunch', function(req, res) {
             month: parseInt(action_info.month),
             day: parseInt(action_info.day),
           }
-          sendLunch(date, res);
+          sendLunch(date, res, schoolInfo);
           break;
         }
       }
       break;
-      default: sendLunch(getDate(0),res,  "날짜 정보를 불러 오지 못해 오늘 급식을 불러 옵니다.") 
+      default: sendLunch(getDate(0),res, schoolInfo,  "날짜 정보를 불러 오지 못해 오늘 급식을 불러 옵니다.") 
     }
   } else{
-    sendLunch(getDate(0),res,  "날짜 정보를 불러 오지 못해 오늘 급식을 불러 옵니다.")
+    sendLunch(getDate(0),res, schoolInfo,  "날짜 정보를 불러 오지 못해 오늘 급식을 불러 옵니다.")
   }
   console.log('todayLunch is working')
 });

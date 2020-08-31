@@ -166,6 +166,7 @@ var getTodayLunch = async function getTodayLunch(count) {
       todayLimit++;
     } else if (todayLimit === 3) {
       var finalString = "";
+      finalLunch = finalLunch.reverse();
       for (var _i in finalLunch) {
         finalString += finalLunch[_i].menu + "\n" + String(finalLunch[_i].date.year) + "년 " + String(finalLunch[_i].date.month) + "월 " + String(finalLunch[_i].date.day) + "일" + (finalLunch[_i].kind + " \uC785\uB2C8\uB2E4.\n\n");
       }

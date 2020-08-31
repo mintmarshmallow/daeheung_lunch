@@ -118,7 +118,7 @@ const getTodayLunch = async (count, currentDate_obj = 0, schoolInfo, todayLimit=
         if(lunch.date.year === currentDate_obj.year && lunch.date.month === currentDate_obj.month && lunch.date.day === currentDate_obj.day){
           finalLunch.push(lunch);
           console.log(finalLunch)
-          todayLimit++           
+          todayLimit++;       
         }
       } else if(todayLimit === 1){
         if(lunch.date.year === currentDate_obj.year && lunch.date.month === currentDate_obj.month && lunch.date.day === currentDate_obj.day){

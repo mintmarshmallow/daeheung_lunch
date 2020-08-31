@@ -40,8 +40,6 @@ var getNoticeAndLetter = async function getNoticeAndLetter(group) {
   }
   try {
     var content = await _axios2.default.get("https://school.iamservice.net/api/article/organization/16777/group/" + groupNum + "?next_token=0");
-    console.log(content.data + '\n\n\n\n\n\n\n');
-    console.log(content.article);
     if (!content.data.articles.length) return null;
     return content;
   } catch (error) {
@@ -250,13 +248,8 @@ apiRouter.post('/todayLunch', function (req, res) {
   console.log('todayLunch is working');
 });
 
-<<<<<<< HEAD
 /*app.listen(1337, function() {
   console.log('Example skill server listening on port 3000!');
-=======
-/*app.listen(1337, function() {
-  console.log('Example skill server listening on port 3000!');
->>>>>>> edcbbd8dfbc29ef4b9dc92f346d4caf71ae924b0
 });*/
 var port = 8001;
 app.listen(process.env.PORT || port);

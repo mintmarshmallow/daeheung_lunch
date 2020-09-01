@@ -250,13 +250,8 @@ apiRouter.post('/todayLunch', function (req, res) {
   console.log('todayLunch is working');
 });
 
-<<<<<<< HEAD
 /*app.listen(1337, function() {
   console.log('Example skill server listening on port 3000!');
-=======
-/*app.listen(1337, function() {
-  console.log('Example skill server listening on port 3000!');
->>>>>>> edcbbd8dfbc29ef4b9dc92f346d4caf71ae924b0
 });*/
 var port = 8001;
 app.listen(process.env.PORT || port);

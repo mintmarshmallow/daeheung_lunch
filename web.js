@@ -168,10 +168,18 @@ var getTodayLunch = async function getTodayLunch(count) {
       var finalString = "";
       finalLunch = finalLunch.reverse();
       for (var _i in finalLunch) {
-        finalString += finalLunch[_i].menu + "\n" + String(finalLunch[_i].date.year) + "년 " + String(finalLunch[_i].date.month) + "월 " + String(finalLunch[_i].date.day) + "일" + (finalLunch[_i].kind + " \uC785\uB2C8\uB2E4.\n\n");
+        finalString += String(finalLunch[_i].date.year) + "년 " + String(finalLunch[_i].date.month) + "월 " + String(finalLunch[_i].date.day) + "일" + (finalLunch[_i].kind + " \uC785\uB2C8\uB2E4.\n\n") + finalLunch[_i].menu;
       }
       return finalString;
     }
+  }
+  if (todayLimit === 3) {
+    var _finalString = "";
+    finalLunch = finalLunch.reverse();
+    for (var _i2 in finalLunch) {
+      _finalString += String(finalLunch[_i2].date.year) + "년 " + String(finalLunch[_i2].date.month) + "월 " + String(finalLunch[_i2].date.day) + "일" + (finalLunch[_i2].kind + " \uC785\uB2C8\uB2E4.\n") + finalLunch[_i2].menu + "\n\n";
+    }
+    return _finalString;
   }
   last_date = lunches_with_date[i].date;
   console.log("last date");

@@ -177,7 +177,7 @@ var getTodayLunch = async function getTodayLunch(count) {
     var _finalString = "";
     finalLunch = finalLunch.reverse();
     for (var _i2 in finalLunch) {
-      _finalString += String(finalLunch[_i2].date.year) + "년 " + String(finalLunch[_i2].date.month) + "월 " + String(finalLunch[_i2].date.day) + "일" + (finalLunch[_i2].kind + " \uC785\uB2C8\uB2E4.\n") + finalLunch[_i2].menu + "\n\n";
+      _finalString += "\n" + String(finalLunch[_i2].date.year) + "년 " + String(finalLunch[_i2].date.month) + "월 " + String(finalLunch[_i2].date.day) + "일" + (finalLunch[_i2].kind + " \uC785\uB2C8\uB2E4.\n\n") + finalLunch[_i2].menu;
     }
     return _finalString;
   }

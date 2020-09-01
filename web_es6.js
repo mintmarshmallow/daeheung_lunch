@@ -145,7 +145,7 @@ const getTodayLunch = async (count, currentDate_obj = 0, schoolInfo, todayLimit=
     let finalString = "";
     finalLunch = finalLunch.reverse();
     for(let i in finalLunch){
-      finalString += String(finalLunch[i].date.year)+"년 " + String(finalLunch[i].date.month) + "월 " + String(finalLunch[i].date.day) +"일"+ `${finalLunch[i].kind} 입니다.\n`+finalLunch[i].menu+"\n\n";
+      finalString += "\n"+String(finalLunch[i].date.year)+"년 " + String(finalLunch[i].date.month) + "월 " + String(finalLunch[i].date.day) +"일"+ `${finalLunch[i].kind} 입니다.\n\n`+finalLunch[i].menu;
     }
     return finalString;
   }

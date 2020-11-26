@@ -224,22 +224,19 @@ apiRouter.post('/todayLunch', function(req, res) {
     schoolName,
     schoolKind
   }
+  console.log(req.body.action);
   if(req.body.action){//전송받은 파라미터 등의 정보 확인
     let action_info = req.body.action.params//.forEach((value, key, mapObject) => console.log(key +' , ' +value));
-    
-    action_info = JSON.parse(action_info.sys_date);
-    date_plugin = JSON.parse(action_info.date_plugin);
-    if(date_plugin){
+    let date_plugin;
+    let date_plugin_obj;
+    if(action_info.date_plugin){//타임피커와 날짜 수동입력을 동시에 사용하면 타임피커를 우선한다.
+      date_plugin = JSON.parse(action_info.date_plugin);
       date_plugin_obj = moment(date_plugin.value, "YYYY-MM-DD");
-      action_info = {
-        year: date_plugin_obj.get('year'),
-        month: date_plugin_obj.get('month'),
-        day: date_plugin_obj.get('date'),
-        dateTag: null,
-        ...action_info,
-        
-      }
-    }
+      action_info.year = date_plugin_obj.get('year');
+      action_info.month = date_plugin_obj.get('month')+1;
+      action_info.day = date_plugin_obj.get('date');
+      action_info.dateTag = null;
+    } else if(action_info.sys_date)action_info = JSON.parse(action_info.sys_date);
     //let allergy_info = req.body.action.알러지정보
     //console.log(allergy_info)
     switch(action_info.dateTag){
